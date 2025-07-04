@@ -14,9 +14,13 @@ from src.main import app
 from fastapi.testclient import TestClient
 import src.main as main
 
-client = TestClient(app)
+# Defer client creation to avoid initialization issues
+client = None
 
 def test_read_root():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
@@ -29,6 +33,9 @@ def test_read_root():
     assert "/newsletter/process" in data["endpoints"]
 
 def test_health_check():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
@@ -38,6 +45,9 @@ def test_health_check():
     assert "service" in data
 
 def test_readiness_check():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/ready")
     assert response.status_code == 200
     data = response.json()
@@ -47,6 +57,10 @@ def test_readiness_check():
 
 def test_health_check_during_shutdown():
     """Test that health check returns unhealthy status during shutdown."""
+    global client
+    if not client:
+        client = TestClient(app)
+    
     # First, verify normal healthy state
     response = client.get("/health")
     assert response.status_code == 200

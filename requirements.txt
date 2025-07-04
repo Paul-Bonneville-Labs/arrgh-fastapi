@@ -5,6 +5,7 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 requests==2.31.0
+httpx<0.28  # Pin for FastAPI TestClient compatibility
 
 # LLM and AI Framework
 openai==1.35.3

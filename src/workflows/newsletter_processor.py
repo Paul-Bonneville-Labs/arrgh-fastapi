@@ -20,12 +20,16 @@ class NewsletterProcessor:
     
     def __init__(self, config: Config):
         self.config = config
-        self.entity_extractor = EntityExtractor(config)
+        self.entity_extractor = None
         self.neo4j_client = Neo4jClient(config)
         
     def initialize(self) -> bool:
         """Initialize processor connections."""
         try:
+            # Initialize entity extractor
+            if not self.entity_extractor:
+                self.entity_extractor = EntityExtractor(self.config)
+            
             # Connect to Neo4j
             if not self.neo4j_client.connect():
                 logger.error("Failed to connect to Neo4j")
@@ -81,6 +85,9 @@ class NewsletterProcessor:
             
             # Step 2: Extract entities with LLM
             state.current_step = "extracting_entities"
+            if not self.entity_extractor:
+                state.errors.append("Entity extractor not initialized")
+                return self._create_error_response(state, start_time)
             state.extracted_entities = self.entity_extractor.extract_entities(state.cleaned_text)
             logger.info("Entities extracted", count=len(state.extracted_entities))
             
