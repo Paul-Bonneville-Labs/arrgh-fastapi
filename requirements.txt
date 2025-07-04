@@ -7,11 +7,11 @@ uvicorn[standard]==0.24.0
 requests==2.31.0
 
 # LLM and AI Framework
-openai==1.10.0
-langchain==0.0.340
-langchain-community==0.0.13
-langchain-openai==0.0.8
-langgraph==0.0.19
+openai==1.35.3
+langchain==0.2.5
+langchain-community==0.2.5
+langchain-openai==0.1.8
+langgraph==0.1.4
 
 # Graph Database
 neo4j==5.15.0
