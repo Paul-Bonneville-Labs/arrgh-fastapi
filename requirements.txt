@@ -9,8 +9,8 @@ requests==2.31.0
 # LLM and AI Framework
 openai==1.3.7
 langchain==0.0.340
-langchain-community==0.0.1
-langchain-openai==0.0.2
+langchain-community==0.0.13
+langchain-openai==0.0.8
 langgraph==0.0.19
 
 # Graph Database
@@ -18,7 +18,7 @@ neo4j==5.15.0
 
 # Data Processing
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml==4.9.4
 html2text==2020.1.16
 
 # Data Validation and Configuration

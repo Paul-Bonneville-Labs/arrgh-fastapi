@@ -114,7 +114,7 @@ async def health_check():
             "status": "healthy",
             "initialized": initialized,
             "neo4j_connected": True,
-            "entity_types": config.ENTITY_CONFIDENCE_THRESHOLD
+            "entity_confidence_threshold": config.ENTITY_CONFIDENCE_THRESHOLD
         }
         
     except Exception as e:

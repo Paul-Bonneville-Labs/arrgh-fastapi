@@ -37,7 +37,7 @@ def clean_html_content(html_content: str) -> str:
         return ""
 
 
-def extract_text_sections(html_content: str) -> Dict[str, any]:
+def extract_text_sections(html_content: str) -> Dict[str, Any]:
     """Extract different sections of the newsletter."""
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
