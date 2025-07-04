@@ -7,7 +7,7 @@ uvicorn[standard]==0.24.0
 requests==2.31.0
 
 # LLM and AI Framework
-openai==1.3.7
+openai==1.10.0
 langchain==0.0.340
 langchain-community==0.0.13
 langchain-openai==0.0.8
