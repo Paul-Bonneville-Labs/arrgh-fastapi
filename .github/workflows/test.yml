@@ -12,7 +12,8 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12"]
+        # Note: Python 3.13 excluded due to dependency compatibility issues
     
     steps:
     - uses: actions/checkout@v4
