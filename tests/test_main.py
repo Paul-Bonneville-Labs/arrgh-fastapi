@@ -1,23 +1,41 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from main import app
+# Add the project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+# Set test environment
+os.environ["ENVIRONMENT"] = "test"
+os.environ["OPENAI_API_KEY"] = "sk-test-key"
+
+# Import via module path
+from src.main import app
 from fastapi.testclient import TestClient
-import main
+import src.main as main
 
-client = TestClient(app)
+# Defer client creation to avoid initialization issues
+client = None
 
 def test_read_root():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
+    assert "description" in data
+    assert "endpoints" in data
     assert "environment" in data
     assert "version" in data
-    assert data["message"] == "Welcome to your FastAPI app on Google Cloud Run! This is a test."
+    assert data["message"] == "Arrgh! Newsletter Processing API"
+    assert "/newsletter/process" in data["endpoints"]
 
 def test_health_check():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
@@ -27,6 +45,9 @@ def test_health_check():
     assert "service" in data
 
 def test_readiness_check():
+    global client
+    if not client:
+        client = TestClient(app)
     response = client.get("/ready")
     assert response.status_code == 200
     data = response.json()
@@ -36,6 +57,10 @@ def test_readiness_check():
 
 def test_health_check_during_shutdown():
     """Test that health check returns unhealthy status during shutdown."""
+    global client
+    if not client:
+        client = TestClient(app)
+    
     # First, verify normal healthy state
     response = client.get("/health")
     assert response.status_code == 200

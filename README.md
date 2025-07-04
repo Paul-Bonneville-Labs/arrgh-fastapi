@@ -1,158 +1,245 @@
-# arrgh-fastapi
+# Arrgh! Aggregated Research Repository
 
-# FastAPI on Google Cloud Run
+**Newsletter Processing System with AI-Powered Entity Extraction and Graph Database**
 
-This project is a minimal FastAPI application ready to be deployed on Google Cloud Run using Docker.
+A FastAPI-based system that processes newsletters to extract entities (organizations, people, products, events, locations, topics) using large language models and stores relationships in a Neo4j graph database.
 
-## Prerequisites
-- Python 3.11, 3.12, or 3.13
-- Docker
-- Google Cloud SDK (`gcloud`)
-- A Google Cloud project with billing enabled
+## 🚀 Quick Start (30 seconds)
 
-## Setting Up a Local Python Virtual Environment
+```bash
+git clone <repository-url>
+cd arrgh-fastapi
+./scripts/setup-local.sh
+```
 
-It is recommended to use a Python virtual environment for local development to keep dependencies isolated.
+**Or see [Quick Start Guide](docs/QUICK-START.md) for detailed setup.**
 
-1. Create a virtual environment:
-   ```sh
-   python3.11 -m venv .venv
-   ```
-2. Activate the virtual environment:
-   - On macOS/Linux:
-     ```sh
-     source .venv/bin/activate
-     ```
-   - On Windows:
-     ```sh
-     .venv\Scripts\activate
-     ```
-3. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-4. For development, also install test dependencies:
-   ```sh
-   pip install -r requirements-dev.txt
-   ```
+## 📋 System Overview
 
-## Running Locally
+This system processes newsletter content through an AI-powered pipeline:
 
-1. Install dependencies (if not already done):
-   ```sh
-   pip install -r requirements.txt
-   ```
-2. Start the app:
-   ```sh
-   uvicorn src.main:app --reload
-   ```
-3. Visit [http://localhost:8000](http://localhost:8000)
+1. **HTML Processing** → Clean and extract text content
+2. **Entity Extraction** → Use OpenAI GPT-4 to identify entities 
+3. **Graph Storage** → Store entities and relationships in Neo4j
+4. **API Endpoints** → FastAPI interface for processing
+5. **Development Notebooks** → Jupyter notebooks for pipeline development
 
-## Running Tests
+### Integration with arrgh-n8n
 
-1. Install test dependencies (if not already done):
-   ```sh
-   pip install -r requirements-dev.txt
-   ```
-2. Run the test suite:
-   ```sh
-   PYTHONPATH=src python -m pytest tests/ -v
-   ```
+This API is designed to work with the **arrgh-n8n** project, which contains n8n workflows that:
+- Monitor and receive newsletter emails
+- Extract content and forward to this processing API
+- Handle the complete email-to-graph pipeline automation
 
-## Building and Running with Docker
+The n8n workflow calls this service's `/process` endpoint with newsletter content for entity extraction and graph storage.
 
-1. Build the Docker image:
-   ```sh
-   docker build -t genai .
-   ```
-2. Run the Docker container:
-   ```sh
-   docker run -p 8080:8080 genai
-   ```
-3. Visit [http://localhost:8080](http://localhost:8080)
+## 🏗️ Architecture
 
-## Deploying to Google Cloud Run
+### Core Components
+- **FastAPI Application** (`src/`) - REST API for newsletter processing
+- **Processing Pipeline** - Entity extraction and graph operations
+- **Neo4j Graph Database** - Entity relationship storage
+- **Jupyter Notebooks** (`notebooks/`) - Development and analysis
+- **Docker Deployment** - Google Cloud Run ready
 
-1. Set your Google Cloud project:
-   ```sh
-   gcloud config set project paulbonneville-com
-   ```
-2. Build the container and push to Google Container Registry:
-   ```sh
-   docker build -t gcr.io/paulbonneville-com/genai .
-   docker push gcr.io/paulbonneville-com/genai
-   ```
-3. Deploy to Cloud Run (with authentication required):
-   ```sh
-   gcloud run deploy genai \
-     --image gcr.io/paulbonneville-com/genai \
-     --platform managed \
-     --region us-central1 \
-     --no-allow-unauthenticated
-   ```
-4. After deployment, get the service URL:
-   ```sh
-   gcloud run services describe genai --region=us-central1 --format="value(status.url)"
-   ```
+### Entity Types Extracted
+- **Organization** - Companies, institutions, government bodies
+- **Person** - Individuals mentioned in content
+- **Product** - Software, hardware, services, models
+- **Event** - Conferences, announcements, launches
+- **Location** - Geographic locations (cities, countries, regions)
+- **Topic** - Subject areas, technologies, fields of study
+
+## 🛠️ Prerequisites
+
+- **Python 3.11+**
+- **Docker** (for Neo4j)
+- **OpenAI API Key**
+- **direnv** (optional, for auto-activation)
+
+## 🚀 Local Development
+
+### Automatic Setup (Recommended)
+```bash
+# Installs dependencies, sets up environment, starts Neo4j
+./scripts/setup-local.sh
+```
+
+### Manual Setup
+```bash
+# 1. Environment setup
+cp .env.example .env.local
+# Edit .env.local with your OpenAI API key
+
+# 2. Dependencies
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt              # Core
+pip install -r requirements-notebook.txt     # + Notebooks  
+pip install -r requirements-dev.txt         # + Testing
+
+# 3. Database
+./scripts/start-neo4j.sh
+
+# 4. Run services
+export ENVIRONMENT=local
+uvicorn src.main:app --reload --port 8000   # API
+jupyter lab notebooks/                      # Notebooks
+```
+
+### Auto-Activation with direnv
+```bash
+# One-time setup
+brew install direnv
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+direnv allow
+
+# Now virtual environment activates automatically when you cd into project
+```
+
+## 📊 Usage
+
+### API Endpoints
+```bash
+# Health check
+curl http://localhost:8000/
+
+# Process newsletter (called by arrgh-n8n workflow)
+curl -X POST http://localhost:8000/process \
+  -H "Content-Type: application/json" \
+  -d '{"html_content": "...", "subject": "Newsletter Title"}'
+```
+
+### Development Notebooks
+```bash
+# Start Jupyter Lab
+jupyter lab notebooks/
+
+# Main development notebook
+open notebooks/newsletter_processing.ipynb
+```
+
+### Database Access
+- **Neo4j Browser**: http://localhost:7474
+- **Credentials**: `neo4j` / `your-neo4j-password` (from .env.local)
+
+## 🧪 Testing
+
+```bash
+# Run test suite
+python -m pytest tests/ -v
+
+# Test specific components
+python -c "from src.config import get_env_file; print('Config OK')"
+```
+
+## 📁 Project Structure
+
+```
+arrgh-fastapi/
+├── src/                          # Core application
+│   ├── main.py                   # FastAPI application
+│   ├── config.py                 # Environment configuration
+│   ├── models/                   # Data models
+│   └── processors/               # Processing pipeline
+├── notebooks/                    # Jupyter development
+│   └── newsletter_processing.ipynb
+├── tests/                        # Test suite
+├── scripts/                      # Utility scripts
+│   ├── setup-local.sh           # Automated setup
+│   ├── start-neo4j.sh           # Start Neo4j Docker
+│   └── stop-neo4j.sh            # Stop Neo4j Docker
+├── docs/                         # Documentation
+│   └── QUICK-START.md           # Detailed setup guide
+├── requirements*.txt             # Dependencies (modular)
+├── .env.example                  # Environment template
+├── .envrc                        # direnv configuration
+└── CLAUDE.md                     # AI assistant guidance
+```
+
+## 🌩️ Environment Files
+
+- **`.env.example`** → Template for local development
+- **`.env.production.example`** → Template for production
+- **`.env.local`** → Your local development config (git-ignored)
+- **`.env.production`** → Your production reference (git-ignored)
+
+## 🚀 Deployment
+
+### Google Cloud Run
+```bash
+# Automatic deployment on push to main branch via Cloud Build
+git push origin main
+
+# Manual deployment
+./scripts/dev-local.sh              # Test locally first
+gcloud run deploy genai \
+  --image gcr.io/paulbonneville-com/genai \
+  --platform managed \
+  --region us-central1 \
+  --no-allow-unauthenticated
+```
+
+### Environment Variables for Production
+Configure these in Google Cloud Run:
+- `OPENAI_API_KEY` - Your OpenAI API key
+- `NEO4J_URI` - Neo4j Aura connection string
+- `NEO4J_USER` - Neo4j username
+- `NEO4J_PASSWORD` - Neo4j password
+- `ENVIRONMENT=production`
+
+## 🧠 AI Processing Pipeline
+
+1. **Input**: Newsletter HTML content
+2. **Text Extraction**: Clean HTML → structured text
+3. **Entity Recognition**: GPT-4 → identify entities with confidence scores
+4. **Graph Operations**: Create/update Neo4j nodes and relationships
+5. **Output**: Structured entity data + graph relationships
+
+## 📈 Monitoring & Metrics
+
+- **Health Endpoint**: `/health` - System status
+- **Processing Metrics**: Entity counts, confidence scores, processing time
+- **Database Stats**: Node counts by type, relationship metrics
+
+## 🔧 Development
+
+### Key Commands
+```bash
+# Environment management
+export ENVIRONMENT=local                    # Set environment
+./scripts/start-neo4j.sh                   # Start database
+./scripts/stop-neo4j.sh                    # Stop database
+
+# Development
+uvicorn src.main:app --reload              # API with hot reload
+jupyter lab notebooks/                     # Notebooks
+python -m pytest tests/ -v                 # Tests
+```
+
+### Adding New Entity Types
+1. Update entity type definitions in `src/models/`
+2. Modify LLM prompts in processing pipeline
+3. Add graph constraints in Neo4j setup
+4. Update documentation
+
+## 📚 Documentation
+
+- **[QUICK-START.md](docs/QUICK-START.md)** - Detailed setup instructions
+- **[CLAUDE.md](CLAUDE.md)** - Complete technical documentation
+- **Jupyter Notebooks** - Interactive development examples
+
+## 🤝 Contributing
+
+1. Create feature branch from `main`
+2. Follow existing code patterns and tests
+3. Update documentation for new features
+4. Ensure all tests pass before PR
+
+## 📄 License
+
+[Add your license information here]
 
 ---
 
-## Authenticating and Testing the Cloud Run Service with a Service Account
-
-To securely test your private Cloud Run service, use a dedicated service account. **Do not commit the key file to version control.**
-
-1. **Create the service account:**
-   ```sh
-   gcloud iam service-accounts create genai-app \
-     --display-name="GenAI App Service Account"
-   ```
-2. **Grant the service account the Cloud Run Invoker role:**
-   ```sh
-   gcloud run services add-iam-policy-binding genai \
-     --region us-central1 \
-     --member="serviceAccount:genai-app@paulbonneville-com.iam.gserviceaccount.com" \
-     --role="roles/run.invoker"
-   ```
-3. **Create and download the service account key:**
-   ```sh
-   gcloud iam service-accounts keys create genai-app-key.json \
-     --iam-account genai-app@paulbonneville-com.iam.gserviceaccount.com
-   ```
-   - This will create a file called `genai-app-key.json` in your current directory.
-   - **Keep this file secure and do not commit it to version control.**
-4. **Authenticate locally using the service account:**
-   ```sh
-   gcloud auth activate-service-account \
-     --key-file=genai-app-key.json
-   ```
-5. **Obtain an identity token and test the service:**
-   ```sh
-   export SERVICE_URL=$(gcloud run services describe genai --region=us-central1 --format="value(status.url)")
-   export TOKEN=$(gcloud auth print-identity-token)
-   curl -H "Authorization: Bearer $TOKEN" $SERVICE_URL
-   ```
-
-You should receive the expected JSON response from your service if authentication is configured correctly.
-
----
-
-Replace `[REGION]` with your actual Google Cloud region if different from `us-central1`.
-
-## Continuous Integration and Deployment
-
-### GitHub Actions CI
-
-This project uses GitHub Actions to automatically run tests on every pull request and push to the `main` branch. The workflow:
-- Tests against Python 3.11, 3.12, and 3.13
-- Installs all dependencies
-- Runs the pytest test suite
-- Blocks PR merging if tests fail
-
-### Google Cloud Run CD
-
-This project is configured so that Google Cloud Run automatically builds and deploys your application whenever you push changes to the `main` branch of your repository. This is achieved by a Cloud Build trigger in the Google Cloud Console that watches your repository for changes. When a new commit is pushed to `main`, Cloud Build builds your Docker image and deploys it to Cloud Run automatically.
-
-This enables a seamless CI/CD workflow, ensuring that your latest code is always running in production without manual intervention.
-
-For more information, see the [Cloud Run Continuous Deployment documentation](https://cloud.google.com/run/docs/continuous-deployment).
-
+**Live Service**: https://genai-860937201650.us-central1.run.app (requires authentication)

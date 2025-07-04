@@ -1,3 +1,14 @@
-# Development and testing dependencies
+# Development and Testing Dependencies
+# Install with: pip install -r requirements-dev.txt
+# (After installing core requirements.txt)
+# Python 3.13 Compatible (Updated July 2025)
+
+# Testing Framework
 pytest==8.4.0
-httpx==0.28.1
+pytest-asyncio==0.21.1
+httpx==0.28.1  # Updated - compatible with FastAPI TestClient
+
+# Development Tools (optional)
+# black                    # Code formatting
+# flake8                   # Linting
+# mypy                     # Type checking
