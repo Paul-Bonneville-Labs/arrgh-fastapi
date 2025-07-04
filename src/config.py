@@ -17,15 +17,15 @@ class Settings(BaseSettings):
     """Application settings with type validation and environment variable support."""
     
     # LLM Configuration
-    openai_api_key: str = Field(..., description="OpenAI API key for LLM operations")
+    openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key for LLM operations")
     llm_model: str = Field(default="gpt-4-turbo", description="LLM model to use")
     llm_temperature: float = Field(default=0.1, ge=0.0, le=2.0, description="LLM temperature")
     llm_max_tokens: int = Field(default=2000, gt=0, description="Maximum tokens for LLM response")
     
     # Neo4j Configuration
-    neo4j_uri: str = Field(..., description="Neo4j database URI")
-    neo4j_user: str = Field(..., description="Neo4j username")
-    neo4j_password: str = Field(..., description="Neo4j password")
+    neo4j_uri: str = Field(default="bolt://localhost:7687", description="Neo4j database URI")
+    neo4j_user: str = Field(default="neo4j", description="Neo4j username")
+    neo4j_password: str = Field(default="password", description="Neo4j password")
     neo4j_database: str = Field(default="neo4j", description="Neo4j database name")
     
     # Processing Configuration
@@ -138,11 +138,30 @@ class Settings(BaseSettings):
         return v
     
     class Config:
-        env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
         # Allow extra fields for forward compatibility
         extra = "allow"
+
+
+def get_env_file() -> str:
+    """Dynamically determine which .env file to load based on ENVIRONMENT variable."""
+    environment = os.getenv("ENVIRONMENT", "local").lower()
+    base_path = Path(__file__).parent.parent
+    
+    # Priority order for environment files (new structure)
+    env_files = [
+        base_path / f".env.{environment}",  # .env.local, .env.production, etc.
+        base_path / ".env.example",         # fallback to example template
+    ]
+    
+    # Return the first file that exists
+    for env_file in env_files:
+        if env_file.exists():
+            return str(env_file)
+    
+    # Return example template if nothing else exists
+    return str(base_path / ".env.example")
 
 
 class DevelopmentSettings(Settings):
@@ -178,14 +197,15 @@ def get_settings() -> Settings:
         Settings: Configured settings instance
     """
     # Determine environment
-    environment = os.getenv("ENVIRONMENT", "development").lower()
+    environment = os.getenv("ENVIRONMENT", "local").lower()
+    env_file = get_env_file()
     
     if environment == "production":
-        return ProductionSettings()
+        return ProductionSettings(_env_file=env_file)
     elif environment == "development":
-        return DevelopmentSettings()
+        return DevelopmentSettings(_env_file=env_file)
     else:
-        return Settings()
+        return Settings(_env_file=env_file)
 
 
 @lru_cache()
@@ -234,8 +254,12 @@ def validate_configuration(settings: Settings) -> List[str]:
 
 def print_configuration_summary(settings: Settings) -> None:
     """Print a summary of the current configuration."""
+    env_file = get_env_file()
+    env_file_name = Path(env_file).name
+    
     print("🔧 Configuration Summary:")
-    print(f"  Environment: {os.getenv('ENVIRONMENT', 'development')}")
+    print(f"  Environment: {os.getenv('ENVIRONMENT', 'local')}")
+    print(f"  Config File: {env_file_name}")
     print(f"  LLM Model: {settings.llm_model}")
     print(f"  Neo4j URI: {settings.neo4j_uri}")
     print(f"  API Host: {settings.api_host}:{settings.api_port}")

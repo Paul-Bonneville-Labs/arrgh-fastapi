@@ -1,0 +1,14 @@
+# Notebook Development Dependencies
+# Install with: pip install -r requirements-notebook.txt
+# (After installing core requirements.txt)
+
+# Jupyter Notebook Environment
+jupyter==1.0.0
+jupyterlab==4.0.9
+notebook==7.0.6
+
+# Data Analysis and Visualization
+pandas==2.1.3
+numpy==1.25.2
+matplotlib==3.8.2
+seaborn==0.13.0

@@ -1,10 +1,14 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from main import app
+# Add the project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+# Import via module path
+from src.main import app
 from fastapi.testclient import TestClient
-import main
+import src.main as main
 
 client = TestClient(app)
 
@@ -13,9 +17,12 @@ def test_read_root():
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
+    assert "description" in data
+    assert "endpoints" in data
     assert "environment" in data
     assert "version" in data
-    assert data["message"] == "Welcome to your FastAPI app on Google Cloud Run! This is a test."
+    assert data["message"] == "Arrgh! Newsletter Processing API"
+    assert "/newsletter/process" in data["endpoints"]
 
 def test_health_check():
     response = client.get("/health")

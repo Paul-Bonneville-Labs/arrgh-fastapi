@@ -8,16 +8,38 @@ This is a minimal FastAPI application designed for deployment on Google Cloud Ru
 
 ## Key Commands
 
-### Local Development with Virtual Environment
+### Environment Configuration
+
+The project uses a clean environment file structure:
+
 ```bash
-# Create and activate virtual environment
+# Template files (committed to repo)
+.env.example                  # "Copy me for local development"
+.env.production.example       # "Copy me for production setup"
+
+# Your actual configs (gitignored)
+.env.local                    # Your real local development config
+.env.production               # Your real production config (for Cloud Secrets reference)
+```
+
+### Local Development Setup
+```bash
+# 1. Create and activate virtual environment
 python3.11 -m venv .venv
 source .venv/bin/activate  # On macOS/Linux
 
-# Install dependencies
+# 2. Copy environment template and customize
+cp .env.example .env.local
+# Edit .env.local with your real OpenAI API key
+
+# 3. Install dependencies (core runtime)
 pip install -r requirements.txt
 
-# Run locally with hot reload
+# 4. For notebook development, also install
+pip install -r requirements-notebook.txt
+
+# 5. Set environment and run
+export ENVIRONMENT=local
 uvicorn src.main:app --reload --port 8000
 ```
 
@@ -31,10 +53,51 @@ docker build -t genai .
 docker run -p 8080:8080 genai
 ```
 
+### Neo4j Database (for notebook development)
+```bash
+# Start Neo4j database for development
+./scripts/start-neo4j.sh
+
+# Stop Neo4j database
+./scripts/stop-neo4j.sh
+
+# Access Neo4j Browser: http://localhost:7474
+# Username: neo4j, Password: your-neo4j-password
+```
+
+### Dependencies
+
+The project uses a modular dependency structure:
+
+```bash
+# Core runtime dependencies (required)
+pip install -r requirements.txt
+
+# Notebook development (optional)
+pip install -r requirements-notebook.txt
+
+# Testing and development (optional)
+pip install -r requirements-dev.txt
+
+# Install everything for full development
+pip install -r requirements.txt -r requirements-notebook.txt -r requirements-dev.txt
+```
+
 ### Testing
 ```bash
-# Run tests (no pytest configuration, use Python directly)
-python -m pytest tests/
+# Install test dependencies
+pip install -r requirements-dev.txt
+
+# Run all tests
+export ENVIRONMENT=local
+python -m pytest tests/ -v
+
+# Run specific test files
+python -m pytest tests/test_simple.py -v
+python -m pytest tests/test_newsletter.py -v
+
+# Test newsletter processing functionality
+python -m pytest tests/test_simple.py::TestHTMLProcessor -v
 ```
 
 ### Deployment

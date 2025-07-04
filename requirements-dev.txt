@@ -1,3 +1,13 @@
-# Development and testing dependencies
+# Development and Testing Dependencies
+# Install with: pip install -r requirements-dev.txt
+# (After installing core requirements.txt)
+
+# Testing Framework
 pytest==8.4.0
+pytest-asyncio==0.21.1
 httpx==0.28.1
+
+# Development Tools (optional)
+# black                    # Code formatting
+# flake8                   # Linting
+# mypy                     # Type checking

@@ -5,6 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from .routers import newsletter
 
 # Configure structured logging
 logging.basicConfig(
@@ -37,18 +38,31 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     logger.info("Shutting down FastAPI app")
+    # Cleanup newsletter processor
+    newsletter.shutdown_processor()
 
 app = FastAPI(
-    title="FastAPI Cloud Run App",
+    title="Arrgh! Newsletter Processing API",
+    description="Process newsletters to extract entities and build knowledge graph",
     version=VERSION,
     lifespan=lifespan
 )
+
+# Include routers
+app.include_router(newsletter.router)
 
 @app.get("/")
 def read_root():
     logger.info("Root endpoint accessed")
     return {
-        "message": "Welcome to your FastAPI app on Google Cloud Run! This is a test.",
+        "message": "Arrgh! Newsletter Processing API",
+        "description": "Extract entities from newsletters and build knowledge graphs",
+        "endpoints": {
+            "/newsletter/process": "Process a newsletter (POST)",
+            "/newsletter/stats": "Get graph statistics (GET)",
+            "/newsletter/health": "Check service health (GET)",
+            "/docs": "API documentation"
+        },
         "environment": ENVIRONMENT,
         "version": VERSION
     }
