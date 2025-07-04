@@ -1,0 +1,46 @@
+# Updated Dependencies for Python 3.13 Compatibility (July 2025)
+# Test requirements file - based on likely available versions
+
+# Web Framework - Updated to latest versions with Python 3.13 support
+fastapi>=0.115.0,<0.116.0
+uvicorn[standard]>=0.32.0,<0.33.0  
+requests>=2.32.0,<2.33.0
+httpx>=0.28.0,<0.31.0  # Remove constraint, use latest
+
+# LLM and AI Framework - Updated to latest with Python 3.13 support
+openai>=1.40.0,<1.41.0
+langchain>=0.3.0,<0.4.0  # Major version update - expect breaking changes
+langchain-community>=0.3.0,<0.4.0
+langchain-openai>=0.2.0,<0.3.0
+langgraph>=0.2.0,<0.3.0
+
+# Graph Database - Updated to latest
+neo4j>=5.25.0,<5.26.0
+
+# Data Processing - Updated to versions with Python 3.13 wheels
+beautifulsoup4>=4.12.3,<4.13.0
+lxml>=5.3.0,<5.4.0  # Major update for Python 3.13 wheels
+html2text>=2024.2.26,<2025.0.0  # Major update from 2020 version
+
+# Data Validation and Configuration - Critical updates for Python 3.13
+pydantic>=2.8.0,<2.9.0  # Essential for Python 3.13 wheels
+pydantic-settings>=2.4.0,<2.5.0
+python-dotenv>=1.0.1,<1.1.0
+
+# Date/Time Utilities
+python-dateutil>=2.9.0,<2.10.0
+
+# Utilities - Updated for Python 3.13 compatibility
+typing-extensions>=4.12.0,<4.13.0  # Important for Python 3.13
+
+# Monitoring and Logging - Updated versions
+structlog>=24.4.0,<24.5.0
+python-json-logger>=2.0.8,<2.1.0
+
+# Cloud Dependencies - Updated versions with Python 3.13 support
+google-cloud-secret-manager>=2.20.0,<2.21.0
+google-cloud-logging>=3.11.0,<3.12.0
+
+# Additional dependencies that may be needed for Python 3.13
+numpy>=1.26.0,<1.27.0  # Explicit numpy for LangChain dependencies
+packaging>=24.0  # Often needed for newer Python versions
