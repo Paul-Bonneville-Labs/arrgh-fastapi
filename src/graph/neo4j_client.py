@@ -89,6 +89,10 @@ class Neo4jClient:
     
     def create_or_update_entity(self, entity: Entity) -> Optional[Dict]:
         """Create or update an entity node in the graph."""
+        # Convert properties to a JSON string if not empty, otherwise set to null
+        import json
+        properties_json = json.dumps(entity.properties) if entity.properties else None
+        
         query = f"""
         MERGE (e:{entity.type} {{name: $name}})
         ON CREATE SET 
@@ -96,7 +100,7 @@ class Neo4jClient:
             e.confidence = $confidence,
             e.aliases = $aliases,
             e.mention_count = 1,
-            e.properties = $properties
+            e.properties_json = $properties_json
         ON MATCH SET
             e.last_seen = datetime(),
             e.mention_count = e.mention_count + 1,
@@ -112,7 +116,7 @@ class Neo4jClient:
             'name': entity.name,
             'confidence': entity.confidence,
             'aliases': entity.aliases,
-            'properties': entity.properties
+            'properties_json': properties_json
         }
         
         result = self.execute_query(query, parameters)
@@ -121,14 +125,13 @@ class Neo4jClient:
     def create_newsletter_node(self, newsletter: Newsletter) -> Optional[Dict]:
         """Create a newsletter node in the graph."""
         query = """
-        CREATE (n:Newsletter {
-            id: $newsletter_id,
-            subject: $subject,
-            sender: $sender,
-            received_date: $received_date,
-            created_at: datetime(),
-            content_length: $content_length
-        })
+        MERGE (n:Newsletter {id: $newsletter_id})
+        ON CREATE SET
+            n.subject = $subject,
+            n.sender = $sender,
+            n.received_date = $received_date,
+            n.created_at = datetime(),
+            n.content_length = $content_length
         RETURN n
         """
         
@@ -149,10 +152,10 @@ class Neo4jClient:
         query = f"""
         MATCH (e:{entity_type} {{name: $entity_name}})
         MATCH (n:Newsletter {{id: $newsletter_id}})
-        CREATE (e)-[r:MENTIONED_IN {{
-            date: datetime(),
-            context: $context
-        }}]->(n)
+        MERGE (e)-[r:MENTIONED_IN]->(n)
+        ON CREATE SET
+            r.date = datetime(),
+            r.context = $context
         RETURN r
         """
         

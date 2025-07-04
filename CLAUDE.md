@@ -101,13 +101,27 @@ python -m pytest tests/test_simple.py::TestHTMLProcessor -v
 ```
 
 ### Deployment
+
 ```bash
-# Deploy to Google Cloud Run (automatic CI/CD is configured for main branch)
-gcloud run deploy genai \
-  --image gcr.io/paulbonneville-com/genai \
+# Verify all secrets are configured
+./scripts/verify-secrets.sh
+
+# Deploy to Google Cloud Run with production secrets
+./scripts/deploy-production.sh
+
+# Manual deployment (if needed)
+gcloud run deploy arrgh-newsletter \
+  --image gcr.io/paulbonneville-com/arrgh-newsletter \
   --platform managed \
   --region us-central1 \
+  --set-secrets OPENAI_API_KEY=newsletter-openai-api-key:latest \
+  --set-secrets NEO4J_PASSWORD=newsletter-neo4j-password:latest \
+  --set-secrets NEO4J_URI=newsletter-neo4j-uri:latest \
+  --set-secrets SECRET_KEY=newsletter-secret-key:latest \
   --no-allow-unauthenticated
+
+# View deployment logs
+gcloud logs tail --follow --service arrgh-newsletter --region us-central1
 ```
 
 ## Architecture
