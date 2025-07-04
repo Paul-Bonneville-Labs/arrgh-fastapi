@@ -15,18 +15,18 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-# Initialize processor
-config = Config()
-processor = NewsletterProcessor(config)
-
-# Initialize processor on startup
+# Lazy initialization
+config = None
+processor = None
 initialized = False
 
 
 def ensure_initialized():
     """Ensure processor is initialized."""
-    global initialized
+    global initialized, config, processor
     if not initialized:
+        config = Config()
+        processor = NewsletterProcessor(config)
         if processor.initialize():
             initialized = True
             logger.info("Newsletter processor initialized")

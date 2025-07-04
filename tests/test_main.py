@@ -5,6 +5,10 @@ import os
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
+# Set test environment
+os.environ["ENVIRONMENT"] = "test"
+os.environ["OPENAI_API_KEY"] = "sk-test-key"
+
 # Import via module path
 from src.main import app
 from fastapi.testclient import TestClient

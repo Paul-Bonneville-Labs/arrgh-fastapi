@@ -59,7 +59,11 @@ Return only valid JSON, no additional text.
         self.config = config
         self.client = None
         if config.OPENAI_API_KEY:
-            self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+            try:
+                self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {e}")
+                self.client = None
         else:
             logger.warning("OpenAI API key not configured")
     

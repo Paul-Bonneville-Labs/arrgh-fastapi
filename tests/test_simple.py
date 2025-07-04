@@ -6,6 +6,10 @@ import os
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
+# Set test environment
+os.environ["ENVIRONMENT"] = "test"
+os.environ["OPENAI_API_KEY"] = "sk-test-key"
+
 import pytest
 from src.models.newsletter import Newsletter, Entity, NewsletterProcessingRequest
 from src.processors.html_processor import clean_html_content, extract_text_sections
