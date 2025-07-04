@@ -1,7 +1,7 @@
 """HTML processing utilities for newsletter content."""
 from bs4 import BeautifulSoup
 import html2text
-from typing import Dict, List
+from typing import Dict, List, Any
 import structlog
 
 logger = structlog.get_logger()

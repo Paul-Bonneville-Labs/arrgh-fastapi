@@ -6,7 +6,7 @@ with support for environment variables and .env files.
 """
 
 from typing import Optional, List
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 import os
@@ -110,7 +110,7 @@ class Settings(BaseSettings):
         description="CORS allowed origins"
     )
     
-    @validator('log_level')
+    @field_validator('log_level')
     def validate_log_level(cls, v):
         """Validate log level is supported."""
         valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
@@ -118,7 +118,7 @@ class Settings(BaseSettings):
             raise ValueError(f'Log level must be one of: {valid_levels}')
         return v.upper()
     
-    @validator('llm_model')
+    @field_validator('llm_model')
     def validate_llm_model(cls, v):
         """Validate LLM model is supported."""
         supported_models = [
@@ -130,18 +130,18 @@ class Settings(BaseSettings):
             pass
         return v
     
-    @validator('neo4j_uri')
+    @field_validator('neo4j_uri')
     def validate_neo4j_uri(cls, v):
         """Basic validation of Neo4j URI format."""
         if not (v.startswith('bolt://') or v.startswith('neo4j://') or v.startswith('neo4j+s://')):
             raise ValueError('Neo4j URI must start with bolt://, neo4j://, or neo4j+s://')
         return v
     
-    class Config:
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        # Allow extra fields for forward compatibility
-        extra = "allow"
+    model_config = {
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "allow"  # Allow extra fields for forward compatibility
+    }
 
 
 def get_env_file() -> str:
@@ -180,7 +180,7 @@ class ProductionSettings(Settings):
     enable_metrics: bool = Field(default=True)
     cors_origins: List[str] = Field(default=[])  # Restrict CORS in production
     
-    @validator('secret_key')
+    @field_validator('secret_key')
     def secret_key_required(cls, v):
         """Require secret key in production."""
         if not v:
