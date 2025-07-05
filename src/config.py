@@ -133,8 +133,9 @@ class Settings(BaseSettings):
     @field_validator('neo4j_uri')
     def validate_neo4j_uri(cls, v):
         """Basic validation of Neo4j URI format."""
-        if not (v.startswith('bolt://') or v.startswith('neo4j://') or v.startswith('neo4j+s://')):
-            raise ValueError('Neo4j URI must start with bolt://, neo4j://, or neo4j+s://')
+        valid_prefixes = ['bolt://', 'bolt+s://', 'neo4j://', 'neo4j+s://']
+        if not any(v.startswith(prefix) for prefix in valid_prefixes):
+            raise ValueError(f'Neo4j URI must start with one of: {", ".join(valid_prefixes)}')
         return v
     
     model_config = {

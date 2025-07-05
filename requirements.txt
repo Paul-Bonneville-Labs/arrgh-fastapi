@@ -1,37 +1,35 @@
 # Core Runtime Dependencies for Arrgh! Newsletter Processing System
 # Install with: pip install -r requirements.txt
 
-# Web Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-requests==2.31.0
-httpx<0.28  # Pin for FastAPI TestClient compatibility
+# Web Framework - Updated to latest stable versions with Python 3.13 support
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+requests==2.32.3
+httpx==0.28.1  # Updated from constraint, compatible with new FastAPI
 
-# LLM and AI Framework
-openai==1.35.3
-langchain==0.2.5
-langchain-community==0.2.5
-langchain-openai==0.1.8
-langgraph==0.1.4
+# LLM and AI Framework - Minimal updates, focused compatibility
+openai==1.54.0  # Latest stable with Python 3.13 wheels
+langchain-openai==0.2.6  # Only package we actually use from LangChain
+langchain-core==0.3.15  # Required dependency for langchain-openai
 
-# Graph Database
-neo4j==5.15.0
+# Graph Database - Latest stable
+neo4j==5.26.0
 
-# Data Processing
-beautifulsoup4==4.12.2
-lxml==4.9.4
-html2text==2020.1.16
+# Data Processing - Updated to versions with Python 3.13 wheels
+beautifulsoup4==4.12.3
+lxml==5.3.0  # Major update for Python 3.13 wheels
+html2text==2024.2.26
 
-# Data Validation and Configuration
-pydantic==2.5.0
-pydantic-settings==2.1.0
-python-dotenv==1.0.0
+# Data Validation and Configuration - Critical for Python 3.13
+pydantic==2.9.2  # Latest with Python 3.13 wheels
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
 
 # Date/Time Utilities
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
 
-# Utilities
-typing-extensions==4.8.0
+# Utilities - Updated for Python 3.13 compatibility
+typing-extensions==4.12.2
 
 # Monitoring and Logging
 structlog==23.2.0
