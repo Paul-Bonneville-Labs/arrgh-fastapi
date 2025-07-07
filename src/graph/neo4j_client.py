@@ -1,5 +1,6 @@
 """Neo4j database client and operations."""
 from typing import List, Dict, Any, Optional
+from urllib.parse import urlparse
 from neo4j import GraphDatabase
 import structlog
 from datetime import datetime
