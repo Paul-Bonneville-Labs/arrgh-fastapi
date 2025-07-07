@@ -102,11 +102,18 @@ direnv allow
 ### API Endpoints
 ```bash
 # Health check
-curl http://localhost:8000/
+curl http://localhost:8000/health
 
-# Process newsletter (called by arrgh-n8n workflow)
-curl -X POST http://localhost:8000/process \
+# Newsletter service health
+curl http://localhost:8000/newsletter/health
+
+# Get graph statistics
+curl http://localhost:8000/newsletter/stats
+
+# Process newsletter (requires API key authentication)
+curl -X POST http://localhost:8000/newsletter/process \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your-api-key-here" \
   -d '{"html_content": "...", "subject": "Newsletter Title"}'
 ```
 
@@ -161,8 +168,10 @@ arrgh-fastapi/
 
 - **`.env.example`** → Template for local development
 - **`.env.production.example`** → Template for production
+- **`.env.test.example`** → Template for testing
 - **`.env.local`** → Your local development config (git-ignored)
 - **`.env.production`** → Your production reference (git-ignored)
+- **`.env.test`** → Your testing config (git-ignored)
 
 ## 🚀 Deployment
 
@@ -196,9 +205,27 @@ Configure these in Google Cloud Run:
 4. **Graph Operations**: Create/update Neo4j nodes and relationships
 5. **Output**: Structured entity data + graph relationships
 
+## 🔐 API Authentication
+
+The newsletter processing endpoint requires API key authentication:
+
+- **Environment Variable**: Set `API_KEY` in your environment file
+- **Header Required**: Include `X-API-Key: your-api-key-here` in requests
+- **Protected Endpoints**: `/newsletter/process` (other endpoints are public)
+- **Production Setup**: API key managed via Google Cloud Secret Manager
+
+```bash
+# Example authenticated request
+curl -X POST http://localhost:8000/newsletter/process \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-api-key-here" \
+  -d '{"html_content": "<html>...</html>", "subject": "Newsletter Title"}'
+```
+
 ## 📈 Monitoring & Metrics
 
 - **Health Endpoint**: `/health` - System status
+- **Newsletter Health**: `/newsletter/health` - Service-specific status
 - **Processing Metrics**: Entity counts, confidence scores, processing time
 - **Database Stats**: Node counts by type, relationship metrics
 
@@ -242,4 +269,4 @@ python -m pytest tests/ -v                 # Tests
 
 ---
 
-- **Live Service**: https://arrgh-fastapi-860937201650.us-central1.run.app (requires authentication)
+- **Live Service**: https://arrgh-fastapi-mfmtscuo4q-uc.a.run.app (requires authentication)
