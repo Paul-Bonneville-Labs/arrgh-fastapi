@@ -36,6 +36,7 @@ steps:
       - '--max-instances=10'
       - '--concurrency=80'
       - '--timeout=300'
+      - '--set-secrets=API_KEY=arrgh-fastapi-key:latest'
       - '--set-env-vars=ENVIRONMENT=production,VERSION=$COMMIT_SHA'
       - '--port=8080'
       - '--quiet'
