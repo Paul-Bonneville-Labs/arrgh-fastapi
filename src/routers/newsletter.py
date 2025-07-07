@@ -1,10 +1,11 @@
 """Newsletter processing API endpoints."""
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from typing import Dict
 import structlog
 from ..models.newsletter import NewsletterProcessingRequest, NewsletterProcessingResponse
 from ..workflows.newsletter_processor import NewsletterProcessor
 from ..config_wrapper import Config
+from ..security import get_api_key
 
 logger = structlog.get_logger()
 
@@ -34,7 +35,7 @@ def ensure_initialized():
             raise HTTPException(status_code=503, detail="Newsletter processor initialization failed")
 
 
-@router.post("/process", response_model=NewsletterProcessingResponse)
+@router.post("/process", response_model=NewsletterProcessingResponse, dependencies=[Depends(get_api_key)])
 async def process_newsletter(request: NewsletterProcessingRequest):
     """
     Process a newsletter through the entity extraction pipeline.
