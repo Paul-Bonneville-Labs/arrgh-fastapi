@@ -215,7 +215,7 @@ The newsletter processing endpoint requires API key authentication:
 - **Production Setup**: API key managed via Google Cloud Secret Manager
 
 ```bash
-# Example authenticated request
+# Example authenticated request (see API Endpoints section above for more examples)
 curl -X POST http://localhost:8000/newsletter/process \
   -H "Content-Type: application/json" \
   -H "X-API-Key: your-api-key-here" \
