@@ -49,8 +49,8 @@ uvicorn src.main:app --reload --port 8000
 ./scripts/dev-local.sh
 
 # Or manually:
-docker build -t genai .
-docker run -p 8080:8080 genai
+docker build -t arrgh-fastapi .
+docker run -p 8080:8080 arrgh-fastapi
 ```
 
 ### Neo4j Database (for notebook development)
@@ -149,10 +149,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 ### Google Cloud Configuration
 - **Project**: paulbonneville-com
-- **Service**: genai
+- **Service**: arrgh-fastapi
 - **Region**: us-central1
 - **Service Account**: genai-app@paulbonneville-com.iam.gserviceaccount.com
-- **Service URL**: https://genai-860937201650.us-central1.run.app
+- **Service URL**: https://arrgh-newsletter-860937201650.us-central1.run.app
 
 ## Important Notes
 

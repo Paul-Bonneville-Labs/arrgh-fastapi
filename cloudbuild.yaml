@@ -25,7 +25,7 @@ steps:
       - 'run'
       - 'services'
       - 'update'
-      - 'genai'
+      - 'arrgh-fastapi'
       - '--platform=managed'
       - '--image=us-central1-docker.pkg.dev/paulbonneville-com/cloud-run-source-deploy/arrgh-fastapi/arrgh-fastapi:$COMMIT_SHA'
       - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID'
