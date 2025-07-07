@@ -10,7 +10,7 @@ echo "🚀 Deploying Newsletter Processing API to Google Cloud Run..."
 # Set project and region
 PROJECT_ID="paulbonneville-com"
 REGION="us-central1"
-SERVICE_NAME="arrgh-newsletter"
+SERVICE_NAME="arrgh-fastapi"
 
 # Ensure we're using the correct project
 gcloud config set project $PROJECT_ID
