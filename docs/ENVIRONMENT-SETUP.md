@@ -79,7 +79,7 @@ export ENVIRONMENT=production
 python -c "from src.config import get_settings, print_configuration_summary; print_configuration_summary(get_settings())"
 
 # Deploy
-gcloud run deploy genai --image gcr.io/paulbonneville-com/genai
+gcloud run deploy arrgh-fastapi --image gcr.io/paulbonneville-com/arrgh-fastapi
 ```
 
 ### Run Jupyter Notebook

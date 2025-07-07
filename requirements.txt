@@ -7,10 +7,8 @@ uvicorn[standard]==0.32.1
 requests==2.32.3
 httpx==0.28.1  # Updated from constraint, compatible with new FastAPI
 
-# LLM and AI Framework - Minimal updates, focused compatibility
+# LLM and AI Framework - Only what we actually use
 openai==1.54.0  # Latest stable with Python 3.13 wheels
-langchain-openai==0.2.6  # Only package we actually use from LangChain
-langchain-core==0.3.15  # Required dependency for langchain-openai
 
 # Graph Database - Latest stable
 neo4j==5.26.0

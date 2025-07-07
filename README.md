@@ -173,8 +173,8 @@ git push origin main
 
 # Manual deployment
 ./scripts/dev-local.sh              # Test locally first
-gcloud run deploy genai \
-  --image gcr.io/paulbonneville-com/genai \
+gcloud run deploy arrgh-fastapi \
+  --image gcr.io/paulbonneville-com/arrgh-fastapi \
   --platform managed \
   --region us-central1 \
   --no-allow-unauthenticated
@@ -242,4 +242,4 @@ python -m pytest tests/ -v                 # Tests
 
 ---
 
-**Live Service**: https://genai-860937201650.us-central1.run.app (requires authentication)
+**Live Service**: https://arrgh-newsletter-860937201650.us-central1.run.app (requires authentication)
