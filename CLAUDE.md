@@ -110,8 +110,8 @@ python -m pytest tests/test_simple.py::TestHTMLProcessor -v
 ./scripts/deploy-production.sh
 
 # Manual deployment (if needed)
-gcloud run deploy arrgh-newsletter \
-  --image gcr.io/paulbonneville-com/arrgh-newsletter \
+gcloud run deploy arrgh-fastapi \
+  --image gcr.io/paulbonneville-com/arrgh-fastapi \
   --platform managed \
   --region us-central1 \
   --set-secrets OPENAI_API_KEY=newsletter-openai-api-key:latest \
@@ -121,7 +121,7 @@ gcloud run deploy arrgh-newsletter \
   --no-allow-unauthenticated
 
 # View deployment logs
-gcloud logs tail --follow --service arrgh-newsletter --region us-central1
+gcloud logs tail --follow --service arrgh-fastapi --region us-central1
 ```
 
 ## Architecture
@@ -152,7 +152,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 - **Service**: arrgh-fastapi
 - **Region**: us-central1
 - **Service Account**: 860937201650-compute@developer.gserviceaccount.com (default)
-- **Service URL**: https://arrgh-newsletter-860937201650.us-central1.run.app
+- **Service URL**: https://arrgh-fastapi-860937201650.us-central1.run.app
 
 ## Important Notes
 

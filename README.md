@@ -242,4 +242,4 @@ python -m pytest tests/ -v                 # Tests
 
 ---
 
-**Live Service**: https://arrgh-newsletter-860937201650.us-central1.run.app (requires authentication)
+**Live Service**: https://arrgh-fastapi-860937201650.us-central1.run.app (requires authentication)
