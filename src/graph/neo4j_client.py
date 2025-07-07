@@ -19,6 +19,14 @@ class Neo4jClient:
     def connect(self) -> bool:
         """Establish connection to Neo4j."""
         try:
+            # Log connection details (without password)
+            parsed_uri = urlparse(self.config.NEO4J_URI)
+            sanitized_uri = f"{parsed_uri.hostname}:{parsed_uri.port}"
+            logger.info("Attempting Neo4j connection", 
+                       uri=sanitized_uri,
+                       user=self.config.NEO4J_USER,
+                       password_length=len(self.config.NEO4J_PASSWORD) if self.config.NEO4J_PASSWORD else 0)
+            
             self.driver = GraphDatabase.driver(
                 self.config.NEO4J_URI, 
                 auth=(self.config.NEO4J_USER, self.config.NEO4J_PASSWORD)
