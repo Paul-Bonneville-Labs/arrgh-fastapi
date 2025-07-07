@@ -20,8 +20,10 @@ class Neo4jClient:
         """Establish connection to Neo4j."""
         try:
             # Log connection details (without password)
+            parsed_uri = urlparse(self.config.NEO4J_URI)
+            sanitized_uri = f"{parsed_uri.hostname}:{parsed_uri.port}"
             logger.info("Attempting Neo4j connection", 
-                       uri=self.config.NEO4J_URI,
+                       uri=sanitized_uri,
                        user=self.config.NEO4J_USER,
                        password_length=len(self.config.NEO4J_PASSWORD) if self.config.NEO4J_PASSWORD else 0)
             
