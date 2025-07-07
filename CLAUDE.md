@@ -151,7 +151,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 - **Project**: paulbonneville-com
 - **Service**: arrgh-fastapi
 - **Region**: us-central1
-- **Service Account**: genai-app@paulbonneville-com.iam.gserviceaccount.com
+- **Service Account**: 860937201650-compute@developer.gserviceaccount.com (default)
 - **Service URL**: https://arrgh-newsletter-860937201650.us-central1.run.app
 
 ## Important Notes
