@@ -92,4 +92,26 @@ def readiness_check():
         "status": "ready",
         "environment": ENVIRONMENT,
         "version": VERSION
+    }
+
+@app.get("/test-connectivity")
+def test_connectivity():
+    """Test connectivity to various ports to debug Cloud Run networking."""
+    from .test_connectivity import run_connectivity_tests
+    
+    logger.info("Running connectivity tests")
+    results = run_connectivity_tests()
+    
+    # Summary
+    total_tests = len(results["tests"])
+    successful_tests = sum(1 for test in results["tests"] if test["success"])
+    
+    return {
+        "summary": {
+            "total_tests": total_tests,
+            "successful": successful_tests,
+            "failed": total_tests - successful_tests
+        },
+        "results": results["tests"],
+        "environment": ENVIRONMENT
     } 
