@@ -5,10 +5,10 @@
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 requests==2.32.3
-httpx==0.28.1  # Updated from constraint, compatible with new FastAPI
+httpx==0.28.1  # Latest stable version
 
 # LLM and AI Framework - Only what we actually use
-openai==1.55.3  # Fix for 'proxies' parameter error in production
+openai==1.93.1  # Latest stable version (July 2025)
 
 # Graph Database - Latest stable
 neo4j==5.26.0
