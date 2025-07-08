@@ -52,7 +52,7 @@ The n8n workflow calls this service's `/process` endpoint with newsletter conten
 
 ## 🛠️ Prerequisites
 
-- **Python 3.11+**
+- **Python 3.13.5+**
 - **Docker** (for Neo4j)
 - **OpenAI API Key**
 - **direnv** (optional, for auto-activation)

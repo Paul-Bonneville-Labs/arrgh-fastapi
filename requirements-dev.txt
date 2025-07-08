@@ -1,7 +1,7 @@
 # Development and Testing Dependencies
 # Install with: pip install -r requirements-dev.txt
 # (After installing core requirements.txt)
-# Python 3.13 Compatible (Updated July 2025)
+# Python 3.13.5 Compatible (Updated July 2025)
 
 # Testing Framework
 pytest==8.4.0

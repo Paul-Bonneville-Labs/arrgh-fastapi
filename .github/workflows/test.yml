@@ -12,8 +12,8 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-        # Python 3.13 re-enabled with updated dependencies (July 2025)
+        python-version: ["3.13.5"]
+        # Python 3.13.5 - Latest stable version (July 2025)
     
     steps:
     - uses: actions/checkout@v4

@@ -1,6 +1,6 @@
 # Multi-stage build for optimized production image
 # Stage 1: Build dependencies
-FROM python:3.11-slim as builder
+FROM python:3.13.5-slim as builder
 
 # Set environment variables for build stage
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -17,12 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install Python dependencies
+# Install Python dependencies - Force fresh build 2025-07-08
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Production image
-FROM python:3.11-slim as production
+FROM python:3.13.5-slim as production
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
