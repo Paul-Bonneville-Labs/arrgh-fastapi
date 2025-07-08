@@ -1,6 +1,7 @@
 # Notebook Development Dependencies
 # Install with: pip install -r requirements-notebook.txt
 # (After installing core requirements.txt)
+# Python 3.13.5 Compatible
 
 # Jupyter Notebook Environment
 jupyter==1.0.0

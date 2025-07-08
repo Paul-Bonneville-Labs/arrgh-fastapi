@@ -25,7 +25,7 @@ The project uses a clean environment file structure:
 ### Local Development Setup
 ```bash
 # 1. Create and activate virtual environment
-python3.11 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate  # On macOS/Linux
 
 # 2. Copy environment template and customize
@@ -134,7 +134,7 @@ gcloud logs tail --follow --service arrgh-fastapi --region us-central1
 
 ### Key Technical Details
 - **Framework**: FastAPI with Uvicorn server
-- **Python**: 3.11
+- **Python**: 3.13.5
 - **Deployment**: Docker on Google Cloud Run
 - **Authentication**: Service account required (no public access)
 - **CI/CD**: Automatic deployment on push to main branch

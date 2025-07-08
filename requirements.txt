@@ -1,32 +1,32 @@
 # Core Runtime Dependencies for Arrgh! Newsletter Processing System
 # Install with: pip install -r requirements.txt
 
-# Web Framework - Updated to latest stable versions with Python 3.13 support
+# Web Framework - Updated to latest stable versions with Python 3.13.5 support
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 requests==2.32.3
 httpx==0.28.1  # Updated from constraint, compatible with new FastAPI
 
 # LLM and AI Framework - Only what we actually use
-openai==1.54.0  # Latest stable with Python 3.13 wheels
+openai==1.54.0  # Latest stable with Python 3.13.5 wheels
 
 # Graph Database - Latest stable
 neo4j==5.26.0
 
-# Data Processing - Updated to versions with Python 3.13 wheels
+# Data Processing - Updated to versions with Python 3.13.5 wheels
 beautifulsoup4==4.12.3
-lxml==5.3.0  # Major update for Python 3.13 wheels
+lxml==5.3.0  # Major update for Python 3.13.5 wheels
 html2text==2024.2.26
 
-# Data Validation and Configuration - Critical for Python 3.13
-pydantic==2.9.2  # Latest with Python 3.13 wheels
+# Data Validation and Configuration - Critical for Python 3.13.5
+pydantic==2.9.2  # Latest with Python 3.13.5 wheels
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
 
 # Date/Time Utilities
 python-dateutil==2.9.0.post0
 
-# Utilities - Updated for Python 3.13 compatibility
+# Utilities - Updated for Python 3.13.5 compatibility
 typing-extensions==4.12.2
 
 # Monitoring and Logging
