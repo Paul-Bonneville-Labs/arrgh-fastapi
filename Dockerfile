@@ -29,9 +29,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
 
-# Install runtime dependencies only
+# Install runtime dependencies and network troubleshooting tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    iputils-ping \
+    dnsutils \
+    netcat-openbsd \
+    curl \
+    traceroute \
+    net-tools \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

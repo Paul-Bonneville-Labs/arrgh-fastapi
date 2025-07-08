@@ -1,0 +1,106 @@
+# Multi-stage build for DEBUG image with comprehensive tools
+# Stage 1: Build dependencies
+FROM python:3.13.5-slim as builder
+
+# Set environment variables for build stage
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Debug image with comprehensive tooling
+FROM python:3.13.5-slim as debug
+
+# Set environment variables for debugging
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONASYNCIODEBUG=1 \
+    ENABLE_DEBUG_MODE=true \
+    LOG_LEVEL=DEBUG
+
+# Install comprehensive network and debugging tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    # Network diagnostic tools
+    iputils-ping \
+    dnsutils \
+    netcat-openbsd \
+    curl \
+    wget \
+    traceroute \
+    net-tools \
+    mtr \
+    telnet \
+    nmap \
+    tcpdump \
+    iftop \
+    nethogs \
+    iperf3 \
+    # SSL/TLS debugging
+    openssl \
+    gnutls-bin \
+    # System monitoring
+    htop \
+    iotop \
+    strace \
+    lsof \
+    procps \
+    # Text processing and utilities
+    jq \
+    vim \
+    nano \
+    less \
+    tree \
+    # Development tools
+    git \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Copy virtual environment from builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Install additional Python debugging tools
+RUN pip install --no-cache-dir \
+    ipython \
+    memory-profiler \
+    py-spy
+
+# Create non-root user but allow debugging access
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set work directory
+WORKDIR /app
+
+# Copy app code and set ownership
+COPY --chown=appuser:appuser src/ ./src/
+
+# Create directory for debug outputs
+RUN mkdir -p /app/debug /app/logs && chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose the port Cloud Run expects
+EXPOSE 8080
+
+# Enhanced health check with more verbose output
+HEALTHCHECK --interval=30s --timeout=15s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Run with debug-friendly settings and enhanced logging
+CMD ["python", "-u", "-X", "dev", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1", "--log-level", "debug", "--access-log"]

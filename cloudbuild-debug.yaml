@@ -1,0 +1,64 @@
+steps:
+  # Build the debug container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--no-cache'
+      - '-t'
+      - 'gcr.io/paulbonneville-com/arrgh-fastapi-debug:$COMMIT_SHA'
+      - '.'
+      - '-f'
+      - 'Dockerfile.debug'
+    id: 'Build-Debug'
+
+  # Push the debug container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/paulbonneville-com/arrgh-fastapi-debug:$COMMIT_SHA'
+    id: 'Push-Debug'
+
+  # Deploy debug container to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - '${_SERVICE_NAME}'
+      - '--platform=managed'
+      - '--image=gcr.io/paulbonneville-com/arrgh-fastapi-debug:$COMMIT_SHA'
+      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,deployment-type=debug'
+      - '--region=us-central1'
+      - '--memory=4Gi'
+      - '--cpu=2'
+      - '--min-instances=0'
+      - '--max-instances=3'
+      - '--concurrency=10'
+      - '--timeout=900'
+      - '--set-secrets=API_KEY=arrgh-fastapi-key:latest'
+      - '--set-secrets=OPENAI_API_KEY=newsletter-openai-api-key:latest'
+      - '--set-secrets=NEO4J_PASSWORD=newsletter-neo4j-password:latest'
+      - '--set-secrets=NEO4J_URI=newsletter-neo4j-uri:latest'
+      - '--set-secrets=SECRET_KEY=newsletter-secret-key:latest'
+      - '--set-env-vars=ENVIRONMENT=debug,VERSION=debug-$COMMIT_SHA,LOG_LEVEL=DEBUG,ENABLE_DEBUG_MODE=true,PYTHONUNBUFFERED=1,PYTHONFAULTHANDLER=1'
+      - '--port=8080'
+      - '--allow-unauthenticated'
+      - '--quiet'
+    id: 'Deploy-Debug'
+
+# Store debug images in Container Registry
+images:
+  - 'gcr.io/paulbonneville-com/arrgh-fastapi-debug:$COMMIT_SHA'
+
+# Use substitutions for flexibility
+substitutions:
+  _SERVICE_NAME: 'arrgh-fastapi-debug'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+tags:
+  - 'gcp-cloud-build-deploy-cloud-run'
+  - 'arrgh-fastapi'
+  - 'debug-deployment'
