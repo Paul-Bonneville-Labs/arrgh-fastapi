@@ -99,15 +99,27 @@ class Neo4jClient:
     
     @retry_with_exponential_backoff(max_retries=3, initial_delay=2.0, max_delay=30.0)
     def _create_neo4j_driver(self) -> GraphDatabase.driver:
-        """Create Neo4j driver with retry logic."""
+        """Create Neo4j driver with retry logic and extended timeouts."""
+        # Extended timeouts for Cloud Run environment
+        connection_timeout = getattr(self.config, 'NEO4J_CONNECTION_TIMEOUT', 120)
+        acquisition_timeout = getattr(self.config, 'NEO4J_ACQUISITION_TIMEOUT', 90)
+        
+        logger.info("Creating Neo4j driver with extended timeouts",
+                   connection_timeout=connection_timeout,
+                   acquisition_timeout=acquisition_timeout)
+        
         return GraphDatabase.driver(
             self.config.NEO4J_URI, 
             auth=(self.config.NEO4J_USER, self.config.NEO4J_PASSWORD),
             max_connection_lifetime=3600,
             max_connection_pool_size=50,
-            connection_acquisition_timeout=30,
-            connection_timeout=30,
-            keep_alive=True
+            connection_acquisition_timeout=acquisition_timeout,
+            connection_timeout=connection_timeout,
+            keep_alive=True,
+            resolver=None,  # Use default resolver
+            encrypted=None,  # Auto-detect from URI
+            trust=None,      # Default trust settings
+            user_agent="arrgh-fastapi/1.0 (Cloud Run)"
         )
     
     @retry_with_exponential_backoff(max_retries=2, initial_delay=1.0, max_delay=15.0)

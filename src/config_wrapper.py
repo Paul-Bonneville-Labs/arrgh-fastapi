@@ -18,6 +18,8 @@ class Config:
         self.NEO4J_USER = settings.neo4j_user
         self.NEO4J_PASSWORD = settings.neo4j_password
         self.NEO4J_DATABASE = settings.neo4j_database
+        self.NEO4J_CONNECTION_TIMEOUT = settings.neo4j_connection_timeout
+        self.NEO4J_ACQUISITION_TIMEOUT = settings.neo4j_acquisition_timeout
         
         # Processing Configuration
         self.MAX_ENTITIES_PER_NEWSLETTER = settings.max_entities_per_newsletter

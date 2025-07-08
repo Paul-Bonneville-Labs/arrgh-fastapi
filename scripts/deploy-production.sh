@@ -35,6 +35,8 @@ gcloud run deploy $SERVICE_NAME \
   --set-env-vars LLM_MAX_TOKENS=2000 \
   --set-env-vars NEO4J_USER=neo4j \
   --set-env-vars NEO4J_DATABASE=neo4j \
+  --set-env-vars NEO4J_CONNECTION_TIMEOUT=180 \
+  --set-env-vars NEO4J_ACQUISITION_TIMEOUT=120 \
   --set-env-vars MAX_ENTITIES_PER_NEWSLETTER=500 \
   --set-env-vars FACT_EXTRACTION_BATCH_SIZE=20 \
   --set-env-vars PROCESSING_TIMEOUT=600 \

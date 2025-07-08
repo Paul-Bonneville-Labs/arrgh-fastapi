@@ -28,6 +28,20 @@ class Settings(BaseSettings):
     neo4j_password: str = Field(default="password", description="Neo4j password")
     neo4j_database: str = Field(default="neo4j", description="Neo4j database name")
     
+    # Neo4j Connection Timeouts (in seconds)
+    neo4j_connection_timeout: int = Field(
+        default=120, 
+        gt=0, 
+        le=300,
+        description="Neo4j connection timeout in seconds (max 5 minutes)"
+    )
+    neo4j_acquisition_timeout: int = Field(
+        default=90, 
+        gt=0, 
+        le=240,
+        description="Neo4j connection acquisition timeout in seconds (max 4 minutes)"
+    )
+    
     # Processing Configuration
     max_entities_per_newsletter: int = Field(
         default=100, 
