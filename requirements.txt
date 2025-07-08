@@ -11,7 +11,7 @@ httpx==0.28.1  # Updated from constraint, compatible with new FastAPI
 openai==1.54.0  # Latest stable with Python 3.13.5 wheels
 
 # Graph Database - Latest stable
-neo4j==5.26.0
+neo4j==5.28.1
 
 # Data Processing - Updated to versions with Python 3.13.5 wheels
 beautifulsoup4==4.12.3
