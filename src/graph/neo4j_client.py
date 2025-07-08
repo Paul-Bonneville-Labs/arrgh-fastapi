@@ -22,7 +22,7 @@ class Neo4jClient:
         try:
             # Log connection details (without password)
             parsed_uri = urlparse(self.config.NEO4J_URI)
-            sanitized_uri = f"{parsed_uri.hostname}:{parsed_uri.port}"
+            sanitized_uri = f"{parsed_uri.scheme}://{parsed_uri.hostname}:{parsed_uri.port}"
             logger.info("Attempting Neo4j connection", 
                        uri=sanitized_uri,
                        user=self.config.NEO4J_USER,
