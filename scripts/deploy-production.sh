@@ -59,10 +59,9 @@ gcloud run deploy $SERVICE_NAME \
   --concurrency 80 \
   --max-instances 10 \
   --timeout 900 \
-  --vpc-egress all \
-  --network default \
-  --subnet default \
-  --no-allow-unauthenticated
+  --vpc-connector neo4j-connector \
+  --vpc-egress private-ranges-only \
+  --allow-unauthenticated
 
 echo "✅ Deployment complete!"
 
