@@ -192,7 +192,8 @@ class Neo4jClient:
             tcp_start = time.time()
             try:
                 test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                test_socket.settimeout(10)
+                connection_timeout = getattr(self.config, 'NEO4J_CONNECTION_TIMEOUT', 120)
+                test_socket.settimeout(connection_timeout)
                 test_socket.connect((ip_addresses[0], parsed_uri.port or 7687))
                 tcp_time = time.time() - tcp_start
                 test_socket.close()
@@ -213,11 +214,13 @@ class Neo4jClient:
             
             # Create Neo4j driver with retry logic
             driver_start = time.time()
+            connection_timeout = getattr(self.config, 'NEO4J_CONNECTION_TIMEOUT', 120)
+            acquisition_timeout = getattr(self.config, 'NEO4J_ACQUISITION_TIMEOUT', 90)
             logger.info("Creating Neo4j driver with retry logic enabled",
                        max_connection_lifetime=3600,
                        max_connection_pool_size=50,
-                       connection_acquisition_timeout=30,
-                       connection_timeout=30)
+                       connection_acquisition_timeout=acquisition_timeout,
+                       connection_timeout=connection_timeout)
             
             try:
                 self.driver = self._create_neo4j_driver()
