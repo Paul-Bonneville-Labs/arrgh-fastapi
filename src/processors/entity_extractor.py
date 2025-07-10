@@ -98,13 +98,45 @@ Return only valid JSON, no additional text.
             
             # Parse JSON response
             result_text = response.choices[0].message.content
-            # Extract JSON from response (handle code blocks)
+            
+            # Log the full response for debugging
+            logger.debug("Raw OpenAI response", response_text=result_text)
+            
+            # Extract JSON from response (handle various formats)
             if "```json" in result_text:
                 result_text = result_text.split("```json")[1].split("```")[0]
             elif "```" in result_text:
                 result_text = result_text.split("```")[1].split("```")[0]
             
-            result = json.loads(result_text.strip())
+            # Try to extract JSON from various response formats
+            result_text = result_text.strip()
+            
+            # If response doesn't start with {, try to find JSON object
+            if not result_text.startswith('{'):
+                # Look for JSON object starting with {
+                start_idx = result_text.find('{')
+                if start_idx != -1:
+                    # Find the matching closing brace
+                    brace_count = 0
+                    end_idx = start_idx
+                    for i, char in enumerate(result_text[start_idx:], start_idx):
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end_idx = i + 1
+                                break
+                    result_text = result_text[start_idx:end_idx]
+                else:
+                    # If no JSON object found, try to construct one
+                    if '"entities"' in result_text or 'entities' in result_text:
+                        logger.warning("Response contains 'entities' but no valid JSON structure", 
+                                     response_snippet=result_text[:100])
+                        # Return empty result to avoid crash
+                        result_text = '{"entities": []}'
+            
+            result = json.loads(result_text)
             
             # Convert to Entity objects
             entities = []
@@ -135,8 +167,12 @@ Return only valid JSON, no additional text.
             return entities
             
         except json.JSONDecodeError as e:
-            logger.error("Failed to parse LLM response as JSON", error=str(e))
+            logger.error("Failed to parse LLM response as JSON", 
+                        error=str(e), 
+                        response_snippet=result_text[:200] if 'result_text' in locals() else "unavailable")
             return []
         except Exception as e:
-            logger.error("Error extracting entities", error=str(e))
+            logger.error("Error extracting entities", 
+                        error=str(e),
+                        response_snippet=response.choices[0].message.content[:200] if 'response' in locals() else "unavailable")
             return []
