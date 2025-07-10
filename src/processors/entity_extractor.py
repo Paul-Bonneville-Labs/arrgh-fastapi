@@ -99,8 +99,8 @@ Return only valid JSON, no additional text.
             # Parse JSON response
             result_text = response.choices[0].message.content
             
-            # Log the full response for debugging
-            logger.debug("Raw OpenAI response", response_text=result_text)
+            # Log a truncated response for debugging
+            logger.debug("Raw OpenAI response (truncated)", response_snippet=result_text[:200])
             
             # Extract JSON from response (handle various formats)
             if "```json" in result_text:
