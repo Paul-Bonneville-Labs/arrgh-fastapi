@@ -67,17 +67,18 @@ class TestEntityExtractor:
     
     def test_entity_extractor_initialization_success(self, mock_config):
         """Test successful EntityExtractor initialization."""
-        with patch('src.processors.entity_extractor.httpx.Client') as mock_httpx, \
-             patch('src.processors.entity_extractor.OpenAI') as mock_openai:
+        with patch('src.processors.entity_extractor.OpenAI') as mock_openai:
             
-            mock_httpx.return_value = MagicMock()
             mock_openai.return_value = MagicMock()
             
             extractor = EntityExtractor(mock_config)
             
             assert extractor.config == mock_config
             assert extractor.client is not None
-            mock_openai.assert_called_once()
+            mock_openai.assert_called_once_with(
+                api_key=mock_config.OPENAI_API_KEY,
+                timeout=30.0
+            )
     
     def test_entity_extractor_initialization_no_api_key(self):
         """Test EntityExtractor initialization without API key."""
