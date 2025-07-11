@@ -132,14 +132,34 @@ python -m pytest tests/test_simple.py::TestHTMLProcessor -v
 
 ### Deployment
 
+**Automated Deployment with Pre-Testing:**
 ```bash
 # Verify all secrets are configured
 ./scripts/verify-secrets.sh
 
-# Deploy to Google Cloud Run with production secrets
+# Deploy to Google Cloud Run with automatic pre-deployment testing
 ./scripts/deploy-production.sh
 
-# Manual deployment (if needed)
+# View deployment logs
+gcloud logs tail --follow --service arrgh-fastapi --region us-central1
+```
+
+**Pre-Deployment Testing (automatically run by deploy script):**
+```bash
+# Run comprehensive pre-deployment tests manually
+./scripts/pre-deployment-tests.sh
+
+# The tests include:
+# - Environment and configuration validation
+# - Unit tests (pytest)
+# - OpenAI API connectivity testing
+# - Entity extraction end-to-end testing
+# - Docker build verification
+# - Production health checks (if deployed)
+```
+
+**Manual Deployment (if needed):**
+```bash
 gcloud run deploy arrgh-fastapi \
   --image gcr.io/paulbonneville-com/arrgh-fastapi \
   --platform managed \
@@ -149,9 +169,6 @@ gcloud run deploy arrgh-fastapi \
   --set-secrets NEO4J_URI=newsletter-neo4j-uri:latest \
   --set-secrets SECRET_KEY=newsletter-secret-key:latest \
   --no-allow-unauthenticated
-
-# View deployment logs
-gcloud logs tail --follow --service arrgh-fastapi --region us-central1
 ```
 
 ## Architecture

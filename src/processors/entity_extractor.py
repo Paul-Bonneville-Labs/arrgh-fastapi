@@ -185,7 +185,20 @@ Return only valid JSON, no additional text.
                         response_snippet=result_text[:200] if 'result_text' in locals() else "unavailable")
             return []
         except Exception as e:
-            logger.error("Error extracting entities", 
-                        error=str(e),
-                        response_snippet=response.choices[0].message.content[:200] if 'response' in locals() else "unavailable")
+            # Log detailed error information for debugging
+            error_details = {
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "response_snippet": response.choices[0].message.content[:200] if 'response' in locals() else "unavailable"
+            }
+            
+            # Add more details for specific exception types
+            if hasattr(e, 'status_code'):
+                error_details["status_code"] = e.status_code
+            if hasattr(e, 'response'):
+                error_details["response_text"] = str(e.response)[:500] if e.response else "None"
+            if hasattr(e, '__cause__') and e.__cause__:
+                error_details["underlying_cause"] = str(e.__cause__)
+                
+            logger.error("Error extracting entities", **error_details)
             return []

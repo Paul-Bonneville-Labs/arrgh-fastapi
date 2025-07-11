@@ -110,6 +110,13 @@ class Settings(BaseSettings):
         description="CORS allowed origins"
     )
     
+    @field_validator('openai_api_key', 'neo4j_password', 'secret_key')
+    def clean_secrets(cls, v):
+        """Strip whitespace from secrets to prevent issues."""
+        if v:
+            return v.strip()
+        return v
+    
     @field_validator('log_level')
     def validate_log_level(cls, v):
         """Validate log level is supported."""
