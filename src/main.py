@@ -2,6 +2,7 @@ import os
 import signal
 import sys
 import logging
+import structlog
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -12,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Environment configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
@@ -173,7 +174,7 @@ def test_openai_connectivity():
                 if hasattr(e, 'response'):
                     error_info["response"] = str(e.response)[:500] if e.response else None
                 test_results["errors"].append(error_info)
-                logger.error("Simple OpenAI request failed", error=error_info)
+                logger.error("Simple OpenAI request failed", **error_info)
                 
         except Exception as e:
             error_info = {
@@ -183,7 +184,7 @@ def test_openai_connectivity():
                 "traceback": traceback.format_exc()
             }
             test_results["errors"].append(error_info)
-            logger.error("OpenAI client initialization failed", error=error_info)
+            logger.error("OpenAI client initialization failed", **error_info)
         
         # Test 4: Test EntityExtractor
         try:
@@ -201,7 +202,7 @@ def test_openai_connectivity():
                 "traceback": traceback.format_exc()
             }
             test_results["errors"].append(error_info)
-            logger.error("EntityExtractor initialization failed", error=error_info)
+            logger.error("EntityExtractor initialization failed", **error_info)
         
         return {
             "summary": {
@@ -219,7 +220,7 @@ def test_openai_connectivity():
         }
         
     except Exception as e:
-        logger.error("Test setup failed", error=str(e), traceback=traceback.format_exc())
+        logger.error("Test setup failed", error_message=str(e), traceback=traceback.format_exc())
         return {
             "summary": {"all_tests_passed": False, "critical_failures": 1},
             "results": {"setup_error": str(e)},
