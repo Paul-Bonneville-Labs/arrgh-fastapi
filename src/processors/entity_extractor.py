@@ -3,7 +3,6 @@ import json
 import os
 from typing import List, Optional
 from openai import OpenAI
-import httpx
 import structlog
 from ..models.newsletter import Entity
 from ..config_wrapper import Config
@@ -62,32 +61,13 @@ Return only valid JSON, no additional text.
         self.client = None
         if config.OPENAI_API_KEY:
             try:
-                # Clear any potential proxy environment variables that might interfere
-                old_env = {}
-                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy']
-                for var in proxy_vars:
-                    if var in os.environ:
-                        old_env[var] = os.environ[var]
-                        del os.environ[var]
-                
-                # Create httpx client explicitly without proxy to avoid parameter mismatch
-                http_client = httpx.Client(
-                    timeout=30.0,
-                    proxy=None,  # Explicitly set to None to avoid proxy issues
-                    trust_env=False  # Don't trust environment variables for proxy config
-                )
-                
-                # Initialize OpenAI client with explicit http_client
+                # Simple OpenAI client initialization - let Cloud Run handle networking
                 self.client = OpenAI(
                     api_key=config.OPENAI_API_KEY,
-                    http_client=http_client
+                    timeout=30.0
                 )
                 
-                # Restore environment variables
-                for var, value in old_env.items():
-                    os.environ[var] = value
-                
-                logger.info("OpenAI client initialized successfully with explicit proxy avoidance")
+                logger.info("OpenAI client initialized successfully")
                 
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI client: {e}")
