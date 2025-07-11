@@ -14,7 +14,7 @@ docker run -d \
   --name neo4j-dev \
   -p 7474:7474 \
   -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/your-neo4j-password \
+  -e NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-$(gcloud secrets versions access latest --secret="newsletter-neo4j-password" 2>/dev/null || echo "dev-default-password")} \
   -e NEO4J_PLUGINS='["apoc"]' \
   -v neo4j-data:/data \
   -v neo4j-logs:/logs \
@@ -30,7 +30,7 @@ if curl -s http://localhost:7474 > /dev/null; then
     echo "📊 Neo4j Browser: http://localhost:7474"
     echo "🔗 Bolt URL: bolt://localhost:7687"
     echo "👤 Username: neo4j"
-    echo "🔑 Password: your-neo4j-password"
+    echo "🔑 Password: ${NEO4J_PASSWORD:-$(gcloud secrets versions access latest --secret="newsletter-neo4j-password" 2>/dev/null || echo "dev-default-password")}"
     echo ""
     echo "💡 To stop Neo4j: docker stop neo4j-dev"
 else

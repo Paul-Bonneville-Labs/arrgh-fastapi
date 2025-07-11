@@ -18,30 +18,60 @@ The project uses a clean environment file structure:
 .env.production.example       # "Copy me for production setup"
 
 # Your actual configs (gitignored)
-.env.local                    # Your real local development config
+.env                          # Your real local development config
 .env.production               # Your real production config (for Cloud Secrets reference)
 ```
 
-### Local Development Setup
+### Modern Development Workflow (FastAPI-First)
+
+**Quick Setup:**
+```bash
+# Automated setup for complete development environment
+./scripts/dev-setup.sh
+
+# Start development server with hot reload
+./scripts/dev-server.sh
+
+# Start continuous testing (in another terminal)
+./scripts/dev-test.sh
+
+# OR start both in tmux
+./scripts/dev-tmux.sh
+```
+
+**Manual Setup:**
 ```bash
 # 1. Create and activate virtual environment
 python3.13 -m venv .venv
 source .venv/bin/activate  # On macOS/Linux
 
 # 2. Copy environment template and customize
-cp .env.example .env.local
-# Edit .env.local with your real OpenAI API key
+cp .env.example .env
+# Edit .env with your real OpenAI API key
 
-# 3. Install dependencies (core runtime)
-pip install -r requirements.txt
+# 3. Install all dependencies
+pip install -r requirements.txt -r requirements-dev.txt -r requirements-notebook.txt
 
-# 4. For notebook development, also install
-pip install -r requirements-notebook.txt
-
-# 5. Set environment and run
-export ENVIRONMENT=local
+# 4. Start development server with hot reload
 uvicorn src.main:app --reload --port 8000
+
+# 5. Start continuous testing (separate terminal)
+ptw --runner "python -m pytest tests/ -v" src/ tests/
 ```
+
+**Notebook Development:**
+The notebook now imports actual FastAPI modules instead of duplicating code:
+```bash
+# Open notebook for interactive testing and analysis
+jupyter lab notebooks/newsletter_development.ipynb
+
+# The notebook imports from src/ modules:
+# - from processors.entity_extractor import EntityExtractor
+# - from models.newsletter import Entity, Newsletter
+# - from graph.neo4j_client import Neo4jClient
+```
+
+**📚 For detailed development workflow documentation, see: [docs/DEVELOPMENT-WORKFLOW.md](docs/DEVELOPMENT-WORKFLOW.md)**
 
 ### Local Development with Docker
 ```bash

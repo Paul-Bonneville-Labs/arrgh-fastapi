@@ -150,11 +150,23 @@ def get_env_file() -> str:
     environment = os.getenv("ENVIRONMENT", "local").lower()
     base_path = Path(__file__).parent.parent
     
-    # Priority order for environment files (new structure)
-    env_files = [
-        base_path / f".env.{environment}",  # .env.local, .env.production, etc.
-        base_path / ".env.example",         # fallback to example template
-    ]
+    # Priority order for environment files
+    env_files = []
+    
+    if environment == "test":
+        # For test environment, look in tests folder first
+        env_files = [
+            base_path / "tests" / ".env.test",  # tests/.env.test
+            base_path / f".env.{environment}",  # fallback to root .env.test
+            base_path / ".env.example",         # fallback to example template
+        ]
+    else:
+        # For other environments (local, production, etc.)
+        env_files = [
+            base_path / f".env.{environment}",  # .env.local, .env.production, etc.
+            base_path / ".env",                 # standard .env file
+            base_path / ".env.example",         # fallback to example template
+        ]
     
     # Return the first file that exists
     for env_file in env_files:
