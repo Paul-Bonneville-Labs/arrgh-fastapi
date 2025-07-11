@@ -7,6 +7,15 @@ set -e
 
 echo "🚀 Deploying Newsletter Processing API to Google Cloud Run..."
 
+# Run pre-deployment tests first
+echo "🧪 Running pre-deployment tests..."
+if ! ./scripts/pre-deployment-tests.sh; then
+    echo "❌ Pre-deployment tests failed. Aborting deployment."
+    exit 1
+fi
+
+echo "✅ Pre-deployment tests passed. Proceeding with deployment..."
+
 # Set project and region
 PROJECT_ID="paulbonneville-com"
 REGION="us-central1"
