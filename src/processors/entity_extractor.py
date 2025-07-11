@@ -1,7 +1,9 @@
 """Entity extraction using LLM."""
 import json
+import os
 from typing import List, Optional
 from openai import OpenAI
+import httpx
 import structlog
 from ..models.newsletter import Entity
 from ..config_wrapper import Config
@@ -36,20 +38,20 @@ Extract entities from the following newsletter text and classify them into these
 
 **Required JSON Format:**
 ```json
-{
+{{
   "entities": [
-    {
+    {{
       "name": "Entity Name",
       "type": "Organization|Person|Product|Event|Location|Topic",
       "aliases": ["Alternative Name 1", "Alternative Name 2"],
       "confidence": 0.95,
       "context": "The sentence or phrase where this entity was mentioned",
-      "properties": {
+      "properties": {{
         "additional_info": "any relevant details"
-      }
-    }
+      }}
+    }}
   ]
-}
+}}
 ```
 
 Return only valid JSON, no additional text.
@@ -60,7 +62,33 @@ Return only valid JSON, no additional text.
         self.client = None
         if config.OPENAI_API_KEY:
             try:
-                self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+                # Clear any potential proxy environment variables that might interfere
+                old_env = {}
+                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy']
+                for var in proxy_vars:
+                    if var in os.environ:
+                        old_env[var] = os.environ[var]
+                        del os.environ[var]
+                
+                # Create httpx client explicitly without proxy to avoid parameter mismatch
+                http_client = httpx.Client(
+                    timeout=30.0,
+                    proxy=None,  # Explicitly set to None to avoid proxy issues
+                    trust_env=False  # Don't trust environment variables for proxy config
+                )
+                
+                # Initialize OpenAI client with explicit http_client
+                self.client = OpenAI(
+                    api_key=config.OPENAI_API_KEY,
+                    http_client=http_client
+                )
+                
+                # Restore environment variables
+                for var, value in old_env.items():
+                    os.environ[var] = value
+                
+                logger.info("OpenAI client initialized successfully with explicit proxy avoidance")
+                
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI client: {e}")
                 self.client = None
@@ -141,15 +169,20 @@ Return only valid JSON, no additional text.
             # Convert to Entity objects
             entities = []
             for entity_data in result.get('entities', []):
+                # Validate required fields
+                if not entity_data.get('name') or not entity_data.get('type'):
+                    continue
+                
                 # Filter by confidence threshold
-                if entity_data.get('confidence', 0) < self.config.ENTITY_CONFIDENCE_THRESHOLD:
+                confidence = entity_data.get('confidence', 0.0)
+                if confidence < self.config.ENTITY_CONFIDENCE_THRESHOLD:
                     continue
                     
                 entity = Entity(
                     name=entity_data['name'],
                     type=entity_data['type'],
                     aliases=entity_data.get('aliases', []),
-                    confidence=entity_data['confidence'],
+                    confidence=confidence,
                     context=entity_data.get('context'),
                     properties=entity_data.get('properties', {})
                 )

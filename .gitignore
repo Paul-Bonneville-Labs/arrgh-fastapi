@@ -120,11 +120,11 @@ celerybeat.pid
 *.sage.py
 
 # Environment Files (actual configs with real values)
-.env.local
+.env
 .env.production
 .env.staging
 .env.development
-.env.test
+tests/.env.test
 
 # Virtual Environments
 .venv
@@ -167,3 +167,4 @@ cython_debug/
 # Removed: genai-app-key.json (service account deleted)
 genai.code-workspace
 n8n-newsletter-key.json
+.DS_Store
