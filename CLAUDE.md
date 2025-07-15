@@ -201,6 +201,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 - **Service Account**: 860937201650-compute@developer.gserviceaccount.com (default)
 - **Service URL**: https://arrgh-fastapi-860937201650.us-central1.run.app
 
+## Email Processing with n8n
+
+### n8n Workflow Integration
+This FastAPI application processes emails received through an n8n workflow. The n8n workflow handles email receipt via AWS SES and calls this application's `/newsletter/process` endpoint for entity extraction.
+
+**Integration Details:**
+- **n8n Instance**: n8n.paulbonneville.com  
+- **Workflow**: "Arrgh Email Processor" (ID: cplr7F8xgOQ0lwpa)
+- **API Endpoint**: `/newsletter/process` - receives email content for entity extraction
+- **Authentication**: API key-based authentication for n8n workflow calls
+
 ## Important Notes
 
 - The application requires authentication via service account for Cloud Run access
@@ -208,3 +219,4 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 - Tests should be run before committing changes
 - The Docker container exposes port 8080 as required by Google Cloud Run
 - Continuous deployment is enabled - changes to main branch automatically deploy
+- **Email Processing**: All emails sent to test@arrgh.paulbonneville.com are automatically processed and forwarded

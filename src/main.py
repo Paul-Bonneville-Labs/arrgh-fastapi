@@ -55,15 +55,24 @@ app.include_router(newsletter.router)
 @app.get("/")
 def read_root():
     logger.info("Root endpoint accessed")
+    endpoints = {
+        "/newsletter/process": "Process a newsletter (POST)",
+        "/newsletter/stats": "Get graph statistics (GET)",
+        "/newsletter/health": "Check service health (GET)",
+        "/docs": "API documentation"
+    }
+    
+    # Add test endpoints only in non-production environments
+    if ENVIRONMENT != "production":
+        endpoints.update({
+            "/test-connectivity": "Test connectivity (GET) - Dev only",
+            "/test-openai": "Test OpenAI connectivity (GET) - Dev only"
+        })
+    
     return {
         "message": "Arrgh! Newsletter Processing API",
         "description": "Extract entities from newsletters and build knowledge graphs",
-        "endpoints": {
-            "/newsletter/process": "Process a newsletter (POST)",
-            "/newsletter/stats": "Get graph statistics (GET)",
-            "/newsletter/health": "Check service health (GET)",
-            "/docs": "API documentation"
-        },
+        "endpoints": endpoints,
         "environment": ENVIRONMENT,
         "version": VERSION
     }
@@ -95,134 +104,136 @@ def readiness_check():
         "version": VERSION
     }
 
-@app.get("/test-connectivity")
-def test_connectivity():
-    """Test connectivity to various ports to debug Cloud Run networking."""
-    from .test_connectivity import run_connectivity_tests
-    
-    logger.info("Running connectivity tests")
-    results = run_connectivity_tests()
-    
-    # Summary
-    total_tests = len(results["tests"])
-    successful_tests = sum(1 for test in results["tests"] if test["success"])
-    
-    return {
-        "summary": {
-            "total_tests": total_tests,
-            "successful": successful_tests,
-            "failed": total_tests - successful_tests
-        },
-        "results": results["tests"],
-        "environment": ENVIRONMENT
-    }
-
-@app.get("/test-openai")
-def test_openai_connectivity():
-    """Test OpenAI API connectivity with detailed error reporting."""
-    from .config_wrapper import Config
-    from .processors.entity_extractor import EntityExtractor
-    from openai import OpenAI
-    import traceback
-    
-    logger.info("Testing OpenAI connectivity")
-    
-    try:
-        # Load config
-        config = Config()
+# Test endpoints - only available in non-production environments
+if ENVIRONMENT != "production":
+    @app.get("/test-connectivity")
+    def test_connectivity():
+        """Test connectivity to various ports to debug Cloud Run networking."""
+        from .test_connectivity import run_connectivity_tests
         
-        # Test 1: Basic client initialization
-        test_results = {
-            "config_loaded": bool(config.OPENAI_API_KEY),
-            "api_key_present": bool(config.OPENAI_API_KEY and len(config.OPENAI_API_KEY) > 0),
-            "api_key_format": config.OPENAI_API_KEY[:10] + "..." if config.OPENAI_API_KEY else None,
-            "client_init": False,
-            "simple_request": False,
-            "entity_extractor": False,
-            "errors": []
+        logger.info("Running connectivity tests")
+        results = run_connectivity_tests()
+        
+        # Summary
+        total_tests = len(results["tests"])
+        successful_tests = sum(1 for test in results["tests"] if test["success"])
+        
+        return {
+            "summary": {
+                "total_tests": total_tests,
+                "successful": successful_tests,
+                "failed": total_tests - successful_tests
+            },
+            "results": results["tests"],
+            "environment": ENVIRONMENT
         }
+
+    @app.get("/test-openai")
+    def test_openai_connectivity():
+        """Test OpenAI API connectivity with detailed error reporting."""
+        from .config_wrapper import Config
+        from .processors.entity_extractor import EntityExtractor
+        from openai import OpenAI
+        import traceback
         
-        # Test 2: Initialize OpenAI client directly
+        logger.info("Testing OpenAI connectivity")
+        
         try:
-            client = OpenAI(
-                api_key=config.OPENAI_API_KEY,
-                timeout=10.0
-            )
-            test_results["client_init"] = True
-            logger.info("OpenAI client initialized successfully")
+            # Load config
+            config = Config()
             
-            # Test 3: Make a simple API call
+            # Test 1: Basic client initialization
+            test_results = {
+                "config_loaded": bool(config.OPENAI_API_KEY),
+                "api_key_present": bool(config.OPENAI_API_KEY and len(config.OPENAI_API_KEY) > 0),
+                "api_key_format": config.OPENAI_API_KEY[:10] + "..." if config.OPENAI_API_KEY else None,
+                "client_init": False,
+                "simple_request": False,
+                "entity_extractor": False,
+                "errors": []
+            }
+            
+            # Test 2: Initialize OpenAI client directly
             try:
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": "Say hello"}],
-                    max_tokens=10,
-                    timeout=10
+                client = OpenAI(
+                    api_key=config.OPENAI_API_KEY,
+                    timeout=10.0
                 )
-                test_results["simple_request"] = True
-                test_results["response_content"] = response.choices[0].message.content
-                logger.info("Simple OpenAI request successful")
+                test_results["client_init"] = True
+                logger.info("OpenAI client initialized successfully")
+                
+                # Test 3: Make a simple API call
+                try:
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "user", "content": "Say hello"}],
+                        max_tokens=10,
+                        timeout=10
+                    )
+                    test_results["simple_request"] = True
+                    test_results["response_content"] = response.choices[0].message.content
+                    logger.info("Simple OpenAI request successful")
+                except Exception as e:
+                    error_info = {
+                        "test": "simple_request",
+                        "error_type": type(e).__name__,
+                        "error_message": str(e),
+                        "traceback": traceback.format_exc()
+                    }
+                    if hasattr(e, 'status_code'):
+                        error_info["status_code"] = e.status_code
+                    if hasattr(e, 'response'):
+                        error_info["response"] = str(e.response)[:500] if e.response else None
+                    test_results["errors"].append(error_info)
+                    logger.error("Simple OpenAI request failed", **error_info)
+                    
             except Exception as e:
                 error_info = {
-                    "test": "simple_request",
+                    "test": "client_init",
                     "error_type": type(e).__name__,
                     "error_message": str(e),
                     "traceback": traceback.format_exc()
                 }
-                if hasattr(e, 'status_code'):
-                    error_info["status_code"] = e.status_code
-                if hasattr(e, 'response'):
-                    error_info["response"] = str(e.response)[:500] if e.response else None
                 test_results["errors"].append(error_info)
-                logger.error("Simple OpenAI request failed", **error_info)
-                
-        except Exception as e:
-            error_info = {
-                "test": "client_init",
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "traceback": traceback.format_exc()
+                logger.error("OpenAI client initialization failed", **error_info)
+            
+            # Test 4: Test EntityExtractor
+            try:
+                extractor = EntityExtractor(config)
+                test_results["entity_extractor"] = bool(extractor.client)
+                if extractor.client:
+                    logger.info("EntityExtractor initialized successfully")
+                else:
+                    logger.error("EntityExtractor client is None")
+            except Exception as e:
+                error_info = {
+                    "test": "entity_extractor",
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "traceback": traceback.format_exc()
+                }
+                test_results["errors"].append(error_info)
+                logger.error("EntityExtractor initialization failed", **error_info)
+            
+            return {
+                "summary": {
+                    "all_tests_passed": all([
+                        test_results["config_loaded"],
+                        test_results["api_key_present"],
+                        test_results["client_init"],
+                        test_results["simple_request"],
+                        test_results["entity_extractor"]
+                    ]),
+                    "critical_failures": len([e for e in test_results["errors"] if e["test"] in ["client_init", "simple_request"]])
+                },
+                "results": test_results,
+                "environment": ENVIRONMENT
             }
-            test_results["errors"].append(error_info)
-            logger.error("OpenAI client initialization failed", **error_info)
-        
-        # Test 4: Test EntityExtractor
-        try:
-            extractor = EntityExtractor(config)
-            test_results["entity_extractor"] = bool(extractor.client)
-            if extractor.client:
-                logger.info("EntityExtractor initialized successfully")
-            else:
-                logger.error("EntityExtractor client is None")
+            
         except Exception as e:
-            error_info = {
-                "test": "entity_extractor",
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "traceback": traceback.format_exc()
-            }
-            test_results["errors"].append(error_info)
-            logger.error("EntityExtractor initialization failed", **error_info)
-        
-        return {
-            "summary": {
-                "all_tests_passed": all([
-                    test_results["config_loaded"],
-                    test_results["api_key_present"],
-                    test_results["client_init"],
-                    test_results["simple_request"],
-                    test_results["entity_extractor"]
-                ]),
-                "critical_failures": len([e for e in test_results["errors"] if e["test"] in ["client_init", "simple_request"]])
-            },
-            "results": test_results,
-            "environment": ENVIRONMENT
-        }
-        
-    except Exception as e:
-        logger.error("Test setup failed", error_message=str(e), traceback=traceback.format_exc())
-        return {
-            "summary": {"all_tests_passed": False, "critical_failures": 1},
-            "results": {"setup_error": str(e)},
-            "environment": ENVIRONMENT
-        } 
+            logger.error("Test setup failed", error_message=str(e), traceback=traceback.format_exc())
+            return {
+                "summary": {"all_tests_passed": False, "critical_failures": 1},
+                "results": {"setup_error": str(e)},
+                "environment": ENVIRONMENT
+            } 
