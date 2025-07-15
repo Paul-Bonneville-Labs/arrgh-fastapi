@@ -63,9 +63,10 @@ gcloud run deploy $SERVICE_NAME \
   --set-secrets NEO4J_URI=newsletter-neo4j-uri:latest \
   --set-secrets SECRET_KEY=newsletter-secret-key:latest \
   --set-secrets API_KEY=arrgh-fastapi-key:latest \
-  --memory 2Gi \
+  --memory 512Mi \
   --cpu 1 \
   --concurrency 80 \
+  --min-instances 0 \
   --max-instances 10 \
   --timeout 900 \
   --vpc-connector neo4j-connector \
